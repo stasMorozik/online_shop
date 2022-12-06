@@ -1,8 +1,9 @@
 requires 'DateTime';
 requires 'Try::Tiny';
 requires 'Moo';
-require 'Email::Address';
-require 'Email::Valid';
+requires 'Email::Address';
+requires 'Email::Valid';
+requires 'Crypt::Password';
 
 feature 'Test::More', 'Test::More support' => sub {
     requires 'Test::More';
