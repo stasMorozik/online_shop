@@ -8,10 +8,14 @@ use lib '../lib';
 use Test::More;
 use Data::Dump;
 use Try::Tiny;
+use UUID::Generator::PurePerl;
+
+my $uid_gen = UUID::Generator::PurePerl->new();
 
 require_ok( 'Core::User::UserEntity' );
 
 my $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Some', 
   'last_name' => 'Some', 
   'email' => 'name@gmail.com', 
@@ -22,6 +26,7 @@ ok($user->isa('Core::User::UserEntity') eq 1, 'New User');
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'nam' => 'Some',
     'last_name' => 'Some', 
     'email' => 'name@gmail.com', 
@@ -34,6 +39,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Som1',
     'last_name' => 'Some', 
     'email' => 'name@gmail.com', 
@@ -45,6 +51,7 @@ try {
 };
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -55,6 +62,7 @@ $user = Core::User::UserEntity->new({
 ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай-Яркий',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -64,6 +72,7 @@ $user = Core::User::UserEntity->new({
 ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай-яркий',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -73,6 +82,7 @@ $user = Core::User::UserEntity->new({
 ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай-яркий',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -82,6 +92,7 @@ $user = Core::User::UserEntity->new({
 ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай Яркий',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -91,6 +102,7 @@ $user = Core::User::UserEntity->new({
 ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Николай яркий',
   'last_name' => 'Минин', 
   'email' => 'name@gmail.com', 
@@ -101,6 +113,7 @@ ok($user->isa('Core::User::UserEntity') eq 1, 'Russian name');
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Николай яркий1',
     'last_name' => 'Минин', 
     'email' => 'name@gmail.com', 
@@ -113,6 +126,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Николай-яркий1',
     'last_name' => 'Минин', 
     'email' => 'name@gmail.com', 
@@ -125,6 +139,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Sqwertyuiopasdfghjklzxcvbnmqasdf',
     'last_name' => 'Some', 
     'email' => 'name@gmail.com', 
@@ -137,6 +152,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'emai' => 'name@gmail.com', 
@@ -149,6 +165,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.', 
@@ -161,6 +178,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => '~@@#$@hevanet.com', 
@@ -172,6 +190,7 @@ try {
 };
 
 $user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
   'name' => 'Some',
   'last_name' => 'Last', 
   'email' => 'name@gmail.com', 
@@ -182,6 +201,7 @@ ok($user->isa('Core::User::UserEntity') eq 1, 'Valid password');
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -194,6 +214,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -206,6 +227,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -218,6 +240,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -230,6 +253,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -242,6 +266,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some', 
     'last_name' => 'Last',
     'email' => 'name@gmail.com', 
@@ -254,6 +279,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some', 
     'last_name' => 'Last',
     'email' => 'name@gmail.com', 
@@ -266,6 +292,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 
@@ -279,6 +306,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -291,6 +319,7 @@ try {
 
 try {
   Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
     'name' => 'Some',
     'last_name' => 'Last', 
     'email' => 'name@gmail.com', 
@@ -301,6 +330,31 @@ try {
   ok($_->isa('Core::Common::Errors::DomainError') eq 1, 'Empty phone number');
 };
 
-done_testing(27);
+try {
+  Core::User::UserEntity->new({
+    'name' => 'Some',
+    'last_name' => 'Last', 
+    'email' => 'name@gmail.com', 
+    'passwors' => '1234', 
+    'phon' => '+79683456782'
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::DomainError') eq 1, 'Empty id');
+};
+
+try {
+  Core::User::UserEntity->new({
+    'id' => '',
+    'name' => 'Some',
+    'last_name' => 'Last', 
+    'email' => 'name@gmail.com', 
+    'passwors' => '1234', 
+    'phon' => '+79683456782'
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid id');
+};
+
+done_testing(29);
 
 1;
