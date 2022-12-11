@@ -355,6 +355,52 @@ try {
   ok($_->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid id');
 };
 
-done_testing(29);
+
+$user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
+  'name' => 'Some', 
+  'last_name' => 'Some', 
+  'email' => 'name@gmail.com', 
+  'password' => 'qwe-rty!12$', 
+  'phone' => '+79683456782'
+});
+
+ok($user->validate_password('qwe-rty!12$') eq 1, 'Validate password');
+
+try {
+  $user = Core::User::UserEntity->new({
+    'id' => $uid_gen->generate_v4(),
+    'name' => 'Some', 
+    'last_name' => 'Some', 
+    'email' => 'name@gmail.com', 
+    'password' => 'qwe-rty!12$', 
+    'phone' => '+79683456782'
+  });
+
+  $user->validate_password('qwe-rty!12$');
+} catch {
+  ok($_->isa('Core::Common::Errors::DomainError') eq 1, 'Wrong password');
+};
+
+$user = Core::User::UserEntity->new({
+  'id' => $uid_gen->generate_v4(),
+  'name' => 'Some', 
+  'last_name' => 'Some', 
+  'email' => 'name@gmail.com', 
+  'password' => 'qwe-rty!12$', 
+  'phone' => '+79683456782'
+});
+
+ok($user->update({'name' => 'Some'}) eq 1, 'Update name');
+
+ok($user->update({'last_name' => 'Some'}) eq 1, 'Update last name');
+
+ok($user->update({'email' => 'name@gmail.com'}) eq 1, 'Update last email');
+
+ok($user->update({'password' => 'qwe-rty!12$'}) eq 1, 'Update last password');
+
+ok($user->update({'phone' => '+79683456782'}) eq 1, 'Update last phone');
+
+done_testing(35);
 
 1;

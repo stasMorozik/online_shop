@@ -1,4 +1,4 @@
-package Core::User::ValueObjects::EmailValueObject;
+package Core::Common::ValueObjects::EmailValueObject;
 
 use strict;
 use warnings;

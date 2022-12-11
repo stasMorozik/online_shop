@@ -22,6 +22,14 @@ around BUILDARGS => sub {
   return $class->$orig($args);
 };
 
+sub validate {
+  my ( $self, $args ) = @_;
+  if (!check_password($self->value, $args)) {
+    die Core::Common::Errors::DomainError("Wrong password");
+  }
+  return 1;
+}
+
 has value => (
   is => 'ro'
 );
