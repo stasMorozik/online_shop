@@ -12,7 +12,7 @@ around BUILDARGS => sub {
 
   $args->{value} = makerandom_itv(Size => 10, Strength => 1, Uniform => 1, Lower => 1000, Upper => 9999);;
 
-  return $class->$orig($args);
+  $class->$orig($args);
 };
 
 sub validate {
