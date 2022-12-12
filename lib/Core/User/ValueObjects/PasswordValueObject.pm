@@ -24,10 +24,11 @@ around BUILDARGS => sub {
 
 sub validate {
   my ( $self, $args ) = @_;
-  if (!check_password($self->value, $args)) {
-    die Core::Common::Errors::DomainError("Wrong password");
-  }
-  return 1;
+
+  die Core::Common::Errors::DomainError("Wrong password")
+    unless (check_password($self->value, $args));
+
+  1;
 }
 
 has value => (

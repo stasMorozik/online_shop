@@ -29,13 +29,13 @@ around BUILDARGS => sub {
 
   $args->{phone} = Core::User::ValueObjects::PhoneNubmerValueObject->new({'value' => $args->{phone}});
 
-  return $class->$orig($args);
+  $class->$orig($args);
 };
 
 sub validate_password {
   my ( $self, $args ) = @_;
 
-  return $self->password->validate($args);
+  $self->password->validate($args);
 }
 
 sub update {

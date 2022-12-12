@@ -11,12 +11,18 @@ use Core::Common::ValueObjects::EmailValueObject;
 around BUILDARGS => sub {
   my ( $orig, $class, $args ) = @_;
 
-  $args->{code} = Core::ConfirmationCode::ValueObjects::CodeValueObject->new({'value' => $args->{code}});
+  $args->{code} = Core::ConfirmationCode::ValueObjects::CodeValueObject->new();
 
   $args->{email} = Core::Common::ValueObjects::EmailValueObject->new({'value' => $args->{email}});
 
   return $class->$orig($args);
 };
+
+sub validate_code {
+  my ( $self, $args ) = @_;
+
+  $self->code->validate($args);
+}
 
 has email => (
   is => 'ro'
@@ -25,3 +31,5 @@ has email => (
 has code => (
   is => 'ro'
 );
+
+1;

@@ -22,6 +22,7 @@ my $user = Core::User::UserEntity->new({
   'password' => 'qwe-rty!12$', 
   'phone' => '+79683456782'
 });
+
 ok($user->isa('Core::User::UserEntity') eq 1, 'New User');
 
 try {
@@ -400,7 +401,5 @@ ok($user->update({'email' => 'name@gmail.com'}) eq 1, 'Update last email');
 ok($user->update({'password' => 'qwe-rty!12$'}) eq 1, 'Update last password');
 
 ok($user->update({'phone' => '+79683456782'}) eq 1, 'Update last phone');
-
-done_testing(35);
 
 1;
