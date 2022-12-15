@@ -30,11 +30,11 @@ sub registry {
 
   my $code = $self->getting_confirmation_code_port->get($user->email->value);
 
-  $code->validate($args->{code});
-
-  $self->create_port->create($user);
-
-  $self->notifying_port->notify($user);
+  if ($code->validate($args->{code})) {
+    if ($self->create_port->create($user)) {
+      $self->notifying_port->notify($user);
+    }
+  }
 }
 
 has create_port => (
