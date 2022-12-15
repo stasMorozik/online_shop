@@ -8,4 +8,4 @@ use Test::More;
 use Core::User::TestUserEntity;
 use Core::ConfirmationCode::TestConfirmationCodeEntity;
 
-done_testing(38);
+done_testing(40);

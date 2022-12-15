@@ -16,7 +16,25 @@ around BUILDARGS => sub {
   die Core::Common::Errors::DomainError->new('Invalid port')
     unless ($args->{getting_confirmation_code_port}->can('get'));
 
+
+  die Core::Common::Errors::DomainError->new('Invalid port')
+    unless ($args->{notifying_port}->can('notify'));
+
   $class->$orig($args);
+}
+
+sub registry {
+  my ( $self, $args ) = @_;
+
+  my $user = Core::User::UserEntity->new($args);
+
+  my $code = $self->getting_confirmation_code_port->get($user->email->value);
+
+  $code->validate($args->{code});
+
+  $self->create_port->create($user);
+
+  $self->notifying_port->notify($user);
 }
 
 has create_port => (

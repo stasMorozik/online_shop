@@ -17,9 +17,9 @@ around BUILDARGS => sub {
 
 sub validate {
   my ( $self, $args ) = @_;
-
-  die Core::Common::Errors::DomainError->new('Wrong confirmation code')
-    unless ($self->value ==  $args);
+  
+  die Core::Common::Errors::DomainError->new({'message' => 'Wrong confirmation code'})
+    if ($self->value !=  $args);
 
   1;
 }
