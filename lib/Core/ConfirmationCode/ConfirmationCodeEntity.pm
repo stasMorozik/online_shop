@@ -15,7 +15,7 @@ around BUILDARGS => sub {
 
   $args->{email} = Core::Common::ValueObjects::EmailValueObject->new({'value' => $args->{email}});
 
-  return $class->$orig($args);
+  $class->$orig($args);
 };
 
 sub validate_code {

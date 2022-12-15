@@ -19,7 +19,7 @@ around BUILDARGS => sub {
 
   $args->{value} = password($args->{value});
 
-  return $class->$orig($args);
+  $class->$orig($args);
 };
 
 sub validate {
