@@ -7,5 +7,6 @@ use Test::More;
 
 use Core::User::TestUserEntity;
 use Core::ConfirmationCode::TestConfirmationCodeEntity;
+use Core::ConfirmationCode::CreatingUseCaseTest;
 
-done_testing(39);
+done_testing(44);
