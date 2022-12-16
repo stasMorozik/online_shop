@@ -1,27 +1,27 @@
 package Core::ConfirmationCode::ConfirmationCodeEntity;
 
-use strict;
-use warnings;
-
 use Moo;
 use Core::Common::Errors::DomainError;
 use Core::ConfirmationCode::ValueObjects::CodeValueObject;
 use Core::Common::ValueObjects::EmailValueObject;
 
-around BUILDARGS => sub {
-  my ( $orig, $class, $args ) = @_;
+sub factory {
+  my ( $self, $args ) = @_;
 
-  $args->{code} = Core::ConfirmationCode::ValueObjects::CodeValueObject->new();
+  my $maybe_email = Core::Common::ValueObjects::EmailValueObject->factory($args->{email});
 
-  $args->{email} = Core::Common::ValueObjects::EmailValueObject->new({'value' => $args->{email}});
+  return $maybe_email if $maybe_email->isa('Core::Common::Errors::DomainError');
 
-  $class->$orig($args);
-};
+  return Core::ConfirmationCode::ConfirmationCodeEntity->new({
+    'email' => $maybe_email,
+    'code' => Core::ConfirmationCode::ValueObjects::CodeValueObject->factory()
+  });
+}
 
 sub validate_code {
   my ( $self, $args ) = @_;
 
-  $self->code->validate($args);
+  return $self->code->validate($args);
 }
 
 has email => (

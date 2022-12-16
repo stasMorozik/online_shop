@@ -1,19 +1,24 @@
 package Core::Common::ValueObjects::EmailValueObject;
 
-use strict;
-use warnings;
-
 use Core::Common::Errors::DomainError;
 
 use Moo;
 use Email::Valid;
 
+sub factory {
+  my ( $self, $arg ) = @_;
+
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid email'})
+    unless $arg;
+
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid email'}) 
+    unless Email::Valid->address('-address' => $arg);
+
+  return Core::Common::ValueObjects::EmailValueObject->new({'value' => $arg});
+}
+
 has value => (
-  is => 'ro',
-  isa => sub {
-    die Core::Common::Errors::DomainError->new({'message' => 'Invalid email'}) 
-      unless Email::Valid->address('-address' => $_[0]);
-  }
+  is => 'ro'
 );
 
 1;

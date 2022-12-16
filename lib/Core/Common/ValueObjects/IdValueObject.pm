@@ -1,23 +1,24 @@
 package Core::Common::ValueObjects::IdValueObject;
 
+use Moo;
 use Data::Validate::UUID qw( is_uuid );
-
-use strict;
-use warnings;
 
 use Core::Common::Errors::DomainError;
 
-use Moo;
+sub factory {
+  my ( $self, $arg ) = @_;
+
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid id'}) 
+    unless $arg;
+
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid id'}) 
+    unless is_uuid($arg);
+
+  return Core::Common::ValueObjects::IdValueObject->new({'value' => $arg});
+} 
 
 has value => (
-  is => 'ro',
-  isa => sub {
-    die Core::Common::Errors::DomainError->new({'message' => 'Invalid id'}) 
-      unless $_[0];
-
-    die Core::Common::Errors::DomainError->new({'message' => 'Invalid id'}) 
-      unless is_uuid($_[0]);
-  }
+  is => 'ro'
 );
 
 1;

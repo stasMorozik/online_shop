@@ -1,9 +1,7 @@
 package Core::User::UserEntity;
 
-use strict;
-use warnings;
-
 use Moo;
+use UUID::Generator::PurePerl;
 
 use Core::User::ValueObjects::NameValueObject;
 use Core::Common::ValueObjects::EmailValueObject;
@@ -13,55 +11,74 @@ use Core::User::ValueObjects::PhoneNubmerValueObject;
 use Core::Common::ValueObjects::IdValueObject;
 use Core::Common::Errors::DomainError;
 
+sub factory {
+  my ( $self, $args ) = @_;
 
-around BUILDARGS => sub {
-  my ( $orig, $class, $args ) = @_;
+  my $uid_gen = UUID::Generator::PurePerl->new();
 
-  $args->{id} = Core::Common::ValueObjects::IdValueObject->new({'value' => $args->{id}});
- 
-  $args->{name} = Core::User::ValueObjects::NameValueObject->new({'value' => $args->{name}});
+  my $maybe_id = Core::Common::ValueObjects::IdValueObject->factory( $uid_gen->generate_v4() );
+  return $maybe_id if $maybe_id->isa('Core::Common::Errors::DomainError');
 
-  $args->{last_name} = Core::User::ValueObjects::NameValueObject->new({'value' => $args->{last_name}});
+  my $maybe_name = Core::User::ValueObjects::NameValueObject->factory($args->{name});
+  return $maybe_name if $maybe_name->isa('Core::Common::Errors::DomainError');
 
-  $args->{email} = Core::Common::ValueObjects::EmailValueObject->new({'value' => $args->{email}});
+  my $maybe_last_name = Core::User::ValueObjects::NameValueObject->factory($args->{last_name});
+  return $maybe_last_name if $maybe_last_name->isa('Core::Common::Errors::DomainError');
 
-  $args->{password} = Core::User::ValueObjects::PasswordValueObject->new({'value' => $args->{password}});
+  my $maybe_email = Core::Common::ValueObjects::EmailValueObject->factory($args->{email});
+  return $maybe_email if $maybe_email->isa('Core::Common::Errors::DomainError');
 
-  $args->{phone} = Core::User::ValueObjects::PhoneNubmerValueObject->new({'value' => $args->{phone}});
+  my $maybe_password = Core::User::ValueObjects::PasswordValueObject->factory($args->{password});
+  return $maybe_password if $maybe_password->isa('Core::Common::Errors::DomainError');
 
-  $class->$orig($args);
-};
+  my $maybe_phone = Core::User::ValueObjects::PhoneNubmerValueObject->factory($args->{phone});
+  return $maybe_phone if $maybe_phone->isa('Core::Common::Errors::DomainError');
+
+  return Core::User::UserEntity->new({
+    'id' => $maybe_id,
+    'name' => $maybe_name,
+    'last_name' => $maybe_last_name,
+    'email' => $maybe_email,
+    'password' => $maybe_password,
+    'phone' => $maybe_phone
+  });
+}
 
 sub validate_password {
   my ( $self, $args ) = @_;
 
-  $self->password->validate($args);
+  return $self->password->validate($args);
 }
 
 sub update {
   my ( $self, $args ) = @_;
 
   if ($args->{name}) {
-    $self->{name} = Core::User::ValueObjects::NameValueObject->new({'value' => $args->{name}});
+    $self->{name} = Core::User::ValueObjects::NameValueObject->factory($args->{name});
+    return $self->{name} if $self->{name}->isa('Core::Common::Errors::DomainError');
   }
 
   if ($args->{last_name}) {
-    $self->{last_name} = Core::User::ValueObjects::NameValueObject->new({'value' => $args->{last_name}});
+    $self->{last_name} = Core::User::ValueObjects::NameValueObject->factory($args->{last_name});
+    return $self->{last_name} if $self->{last_name}->isa('Core::Common::Errors::DomainError');
   }
 
   if ($args->{email}) {
-    $self->{email} = Core::Common::ValueObjects::EmailValueObject->new({'value' => $args->{email}});
+    $self->{email} = Core::Common::ValueObjects::EmailValueObject->factory($args->{email});
+    return $self->{email} if $self->{email}->isa('Core::Common::Errors::DomainError');
   }
 
   if ($args->{phone}) {
-    $self->{phone} = Core::User::ValueObjects::PhoneNubmerValueObject->new({'value' => $args->{phone}});
+    $self->{phone} = Core::User::ValueObjects::PhoneNubmerValueObject->factory($args->{phone});
+    return $self->{phone} if $self->{phone}->isa('Core::Common::Errors::DomainError');
   }
 
   if ($args->{password}) {
-    $self->{password} = Core::User::ValueObjects::PasswordValueObject->new({'value' => $args->{password}});
+    $self->{password} = Core::User::ValueObjects::PasswordValueObject->factory($args->{password});
+    return $self->{password} if $self->{password}->isa('Core::Common::Errors::DomainError');
   }
 
-  1;
+  return 1;
 }
 
 has id => (

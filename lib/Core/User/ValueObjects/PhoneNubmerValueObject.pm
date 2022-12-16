@@ -1,22 +1,24 @@
 package Core::User::ValueObjects::PhoneNubmerValueObject;
 
-use strict;
-use warnings;
-
 use Core::Common::Errors::DomainError;
 
 use Moo;
 use Crypt::Password;
 
-has value => (
-  is => 'ro',
-  isa => sub {
-    die Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
-      unless $_[0];
+sub factory {
+  my ( $self, $arg ) = @_;
 
-    die Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
-      unless $_[0] =~ /\+79[0-9]{2,2}[0-9]{7,7}+$/g;
-  }
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
+    unless $arg;
+
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
+    unless $arg =~ /\+79[0-9]{2,2}[0-9]{7,7}+$/g;
+
+  return Core::User::ValueObjects::PhoneNubmerValueObject->new({'value' => $arg});
+}
+
+has value => (
+  is => 'ro'
 );
 
 1;

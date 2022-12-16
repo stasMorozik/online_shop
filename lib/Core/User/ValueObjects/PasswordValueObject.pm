@@ -1,34 +1,29 @@
 package Core::User::ValueObjects::PasswordValueObject;
 
-use strict;
-use warnings;
-
 use Core::Common::Errors::DomainError;
 
 use Moo;
 use Crypt::Password;
 
-around BUILDARGS => sub {
-  my ( $orig, $class, $args ) = @_;
+sub factory {
+  my ( $self, $arg ) = @_;
 
-  die Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
-    unless $args->{value};
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
+    unless $arg;
 
-  die Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
-    unless $args->{value} =~ /[A-Za-z0-9\.\,\!\?\$\@\&\-\*\_]{5,15}+$/g;
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
+    unless $arg =~ /[A-Za-z0-9\.\,\!\?\$\@\&\-\*\_]{5,15}+$/g;
 
-  $args->{value} = password($args->{value});
-
-  $class->$orig($args);
-};
+  return Core::User::ValueObjects::PasswordValueObject->new({'value' =>  password($arg)});
+}
 
 sub validate {
   my ( $self, $args ) = @_;
+  
+  return Core::Common::Errors::DomainError->new({'message' => 'Wrong password'})
+    unless check_password($self->value, $args);
 
-  die Core::Common::Errors::DomainError("Wrong password")
-    unless (check_password($self->value, $args));
-
-  1;
+  return 1;
 }
 
 has value => (

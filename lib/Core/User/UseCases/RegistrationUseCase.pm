@@ -1,40 +1,71 @@
 package Core::User::UseCases::RegistrationUseCase;
 
-use strict;
-use warnings;
-
 use Moo;
 use Core::User::UserEntity;
+use Core::ConfirmationCode::ConfirmationCodeEntity;
 use Core::Common::Errors::DomainError;
+use Core::Common::Errors::InfrastructureError;
 
-around BUILDARGS => sub {
-  my ( $orig, $class, $args ) = @_;
+sub factory {
+  my ( $self, $args ) = @_;
 
-  die Core::Common::Errors::DomainError->new('Invalid port')
-    unless ($args->{create_port}->can('create'));
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{create_port};
 
-  die Core::Common::Errors::DomainError->new('Invalid port')
-    unless ($args->{getting_confirmation_code_port}->can('get'));
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{create_port}->can('create');
+  
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{getting_confirmation_code_port};
 
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{getting_confirmation_code_port}->can('get');
 
-  die Core::Common::Errors::DomainError->new('Invalid port')
-    unless ($args->{notifying_port}->can('notify'));
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{notifying_port};
 
-  $class->$orig($args);
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid port'})
+    unless $args->{notifying_port}->can('notify');
+
+  return Core::User::UseCases::RegistrationUseCase->new({
+    'create_port' => $args->{create_port},
+    'getting_confirmation_code_port' => $args->{getting_confirmation_code_port},
+    'notifying_port' => $args->{notifying_port}
+  });
 }
 
 sub registry {
   my ( $self, $args ) = @_;
 
-  my $user = Core::User::UserEntity->new($args);
+  return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'})
+    unless $args->{code};
 
-  my $code = $self->getting_confirmation_code_port->get($user->email->value);
+  my $maybe_user = Core::User::UserEntity->factory($args);
 
-  if ($code->validate($args->{code})) {
-    if ($self->create_port->create($user)) {
-      $self->notifying_port->notify($user);
-    }
-  }
+  return $maybe_user
+    if $maybe_user->isa('Core::Common::Errors::DomainError');
+
+  my $maybe_code = $self->getting_confirmation_code_port->get($maybe_user->email);
+
+  return $maybe_code
+    if $maybe_code->isa('Core::Common::Errors::InfrastructureError');
+
+  my $maybe_true = $maybe_code->validate_code($args->{code});
+
+  return $maybe_true
+    if $maybe_true->isa('Core::Common::Errors::DomainError');
+
+  $maybe_true = $self->create_port->create($maybe_user);
+
+  return $maybe_true
+    if $maybe_true->isa('Core::Common::Errors::InfrastructureError');
+
+  $self->notifying_port->notify({
+    'email' => $maybe_user->email,
+    'message' => "Hello $maybe_user->name->value! Welcome and enjoy your shopping!"
+  });
+  
+  return 1;
 }
 
 has create_port => (

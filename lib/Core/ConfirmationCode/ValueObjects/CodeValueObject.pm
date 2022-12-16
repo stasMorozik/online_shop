@@ -1,27 +1,22 @@
 package Core::ConfirmationCode::ValueObjects::CodeValueObject;
 
-use strict;
-use warnings;
-
 use Moo;
 use Core::Common::Errors::DomainError;
 use Crypt::Random qw( makerandom_itv );
 
-around BUILDARGS => sub {
-  my ( $orig, $class, $args ) = @_;
-
-  $args->{value} = makerandom_itv(Size => 10, Strength => 1, Uniform => 1, Lower => 1000, Upper => 9999);;
-
-  $class->$orig($args);
-};
+sub factory {
+  return Core::ConfirmationCode::ValueObjects::CodeValueObject->new({
+    'value' => makerandom_itv(Size => 10, Strength => 1, Uniform => 1, Lower => 1000, Upper => 9999)
+  });
+}
 
 sub validate {
-  my ( $self, $args ) = @_;
+  my ( $self, $arg ) = @_;
   
-  die Core::Common::Errors::DomainError->new({'message' => 'Wrong confirmation code'})
-    if ($self->value !=  $args);
+  return Core::Common::Errors::DomainError->new({'message' => 'Wrong confirmation code'})
+    if ($self->value !=  $arg);
 
-  1;
+  return 1;
 }
 
 has value => (
