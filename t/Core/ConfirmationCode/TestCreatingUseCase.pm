@@ -7,13 +7,14 @@ use lib '../lib';
 
 use Test::More;
 use Data::Dump;
-use Try::Tiny;
 
 use Core::Common::Errors::DomainError;
 
 use Core::Common::FakeAdapters::NotifyingAdapter;
 use Core::ConfirmationCode::UseCases::CreatingUseCase;
 use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
+
+require_ok( 'Core::ConfirmationCode::UseCases::CreatingUseCase' );
 
 my $use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'creating_port' => Core::ConfirmationCode::FakeAdapters::CreatingAdapter->new({

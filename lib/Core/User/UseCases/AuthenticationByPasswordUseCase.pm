@@ -37,7 +37,8 @@ sub factory {
   }
 
   return Core::User::UseCases::AuthenticationByPasswordUseCase->new({
-    'getting_user_by_email_port' => $args->{getting_user_by_email_port}
+    'getting_user_by_email_port' => $args->{getting_user_by_email_port},
+    'secret_key' => $args->{secret_key}
   });
 }
 
@@ -46,10 +47,6 @@ sub auth {
 
   unless ($args) {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
-  }
-
-  unless ($args->{secret}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid secret key'});
   }
 
   my $maybe_email = Core::Common::ValueObjects::EmailValueObject->factory($args->{email});
@@ -68,10 +65,10 @@ sub auth {
   }
 
   my $claims = {
-    iss => $maybe_user->id->value,
-    exp => 1300819380
+    'iss' => $maybe_user->email->value,
+    'exp' => time() + 600
   };
-
+  
   return encode_jwt($claims, $self->secret_key);
 }
 
@@ -82,3 +79,5 @@ has getting_user_by_email_port => (
 has secret_key => (
   is => 'ro'
 );
+
+1;

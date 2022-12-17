@@ -7,8 +7,6 @@ use lib '../lib';
 
 use Test::More;
 use Data::Dump;
-use Try::Tiny;
-use Scalar::Util qw(reftype blessed);
 
 require_ok( 'Core::User::UserEntity' );
 
