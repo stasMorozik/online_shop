@@ -7,7 +7,6 @@ use UUID::Generator::PurePerl;
 use Core::User::ValueObjects::NameValueObject;
 use Core::Common::ValueObjects::EmailValueObject;
 use Core::User::ValueObjects::PasswordValueObject;
-use Core::User::ValueObjects::PasswordValueObject;
 use Core::User::ValueObjects::PhoneNubmerValueObject;
 use Core::Common::ValueObjects::IdValueObject;
 use Core::Common::Errors::DomainError;
@@ -67,6 +66,10 @@ sub factory {
 
 sub validate_password {
   my ( $self, $args ) = @_;
+
+  unless ($args) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Wrong password'});
+  }
 
   return $self->password->validate($args);
 }

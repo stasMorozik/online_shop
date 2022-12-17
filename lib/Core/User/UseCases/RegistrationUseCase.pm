@@ -64,6 +64,10 @@ sub factory {
 sub registry {
   my ( $self, $args ) = @_;
 
+  unless ($args) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
   unless ($args->{code}) {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'});
   }

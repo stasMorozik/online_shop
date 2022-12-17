@@ -7,6 +7,7 @@ requires 'Crypt::Password';
 requires 'UUID::Generator::PurePerl';
 requires 'Data::Validate::UUID';
 requires 'Crypt::Random';
+requires 'JSON::WebToken';
 
 feature 'Test::More', 'Test::More support' => sub {
     requires 'Test::More';
