@@ -73,25 +73,21 @@ sub registry {
   }
 
   my $maybe_user = Core::User::UserEntity->factory($args);
-
   if ($maybe_user->isa('Core::Common::Errors::DomainError')) {
     return $maybe_user;
   }
 
   my $maybe_code = $self->getting_confirmation_code_port->get($maybe_user->email);
-
   if ($maybe_code->isa('Core::Common::Errors::InfrastructureError')) {
     return $maybe_code;
   }
 
   my $maybe_true = $maybe_code->validate_code($args->{code});
-
   if ($maybe_true->isa('Core::Common::Errors::DomainError')) {
     return $maybe_true;
   }
 
   $maybe_true = $self->creating_port->create($maybe_user);
-
   if ($maybe_true->isa('Core::Common::Errors::InfrastructureError')) {
     return $maybe_true;
   }

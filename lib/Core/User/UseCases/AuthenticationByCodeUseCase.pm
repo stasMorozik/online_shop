@@ -25,27 +25,27 @@ sub factory {
   }
 
   unless ($args->{getting_user_by_email_port}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting user port'});
   }
 
   unless (blessed $args->{getting_user_by_email_port}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'}); 
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting user port'}); 
   }
 
   unless ($args->{getting_user_by_email_port}->can('get')) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting user port'});
   }
 
   unless ($args->{getting_confirmation_code_port}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting code port'});
   }
 
   unless (blessed $args->{getting_confirmation_code_port}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});   
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting code port'});   
   }
 
   unless ($args->{getting_confirmation_code_port}->can('get')) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting code port'});
   }
 
   return Core::User::UseCases::AuthenticationByCodeUseCase->new({
@@ -72,7 +72,6 @@ sub auth {
   }
 
   my $maybe_code = $self->getting_confirmation_code_port->get($maybe_email);
-
   if ($maybe_code->isa('Core::Common::Errors::InfrastructureError')) {
     return $maybe_code;
   }
@@ -83,7 +82,6 @@ sub auth {
   }
 
   my $maybe_true = $maybe_code->validate_code($args->{code});
-
   if ($maybe_true->isa('Core::Common::Errors::DomainError')) {
     return $maybe_true;
   }
