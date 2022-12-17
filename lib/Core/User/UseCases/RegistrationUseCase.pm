@@ -78,7 +78,16 @@ sub registry {
   }
 
   my $maybe_code = $self->getting_confirmation_code_port->get($maybe_user->email);
-  if ($maybe_code->isa('Core::Common::Errors::InfrastructureError')) {
+  
+  unless (reftype($maybe_code) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'}); 
+  }
+
+  unless (blessed $maybe_code) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'});   
+  }
+
+  unless ($maybe_code->isa('Core::ConfirmationCode::ConfirmationCodeEntity')) {
     return $maybe_code;
   }
 

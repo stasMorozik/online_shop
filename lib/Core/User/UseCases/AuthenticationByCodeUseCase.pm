@@ -72,12 +72,30 @@ sub auth {
   }
 
   my $maybe_code = $self->getting_confirmation_code_port->get($maybe_email);
-  if ($maybe_code->isa('Core::Common::Errors::InfrastructureError')) {
+  
+  unless (reftype($maybe_code) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'}); 
+  }
+
+  unless (blessed $maybe_code) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'});   
+  }
+
+  unless ($maybe_code->isa('Core::ConfirmationCode::ConfirmationCodeEntity')) {
     return $maybe_code;
   }
 
   my $maybe_user = $self->getting_user_by_email_port->get($maybe_email);
-  if ($maybe_user->isa('Core::Common::Errors::InfrastructureError')) {
+
+  unless (reftype($maybe_user) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid user'}); 
+  }
+
+  unless (blessed $maybe_user) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid user'});   
+  }
+
+  unless ($maybe_user->isa('Core::User::UserEntity')) {
     return $maybe_user;
   }
 
