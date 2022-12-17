@@ -8,18 +8,21 @@ use Data::Dump;
 sub notify {
   my ( $self, $args ) = @_;
 
-  return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid email'})
-    unless $args->{email};
+  unless ($args->{email}) {
+    return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid email'});
+  }
 
-  return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid message'})
-    unless $args->{message};
+  unless ($args->{message}) {
+    return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid message'});
+  }
 
-  return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid email'})
-    unless $args->{email}->isa('Core::Common::ValueObjects::EmailValueObject');
+  unless ($args->{email}->isa('Core::Common::ValueObjects::EmailValueObject')) {
+    return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid email'});
+  }
 
   dd($args->{message});
 
-  1;
+  return 1;
 }
 
 1;

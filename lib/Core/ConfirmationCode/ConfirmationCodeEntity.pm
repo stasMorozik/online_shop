@@ -1,6 +1,7 @@
 package Core::ConfirmationCode::ConfirmationCodeEntity;
 
 use Moo;
+use Scalar::Util qw(reftype);
 use Core::Common::Errors::DomainError;
 use Core::ConfirmationCode::ValueObjects::CodeValueObject;
 use Core::Common::ValueObjects::EmailValueObject;
@@ -8,9 +9,19 @@ use Core::Common::ValueObjects::EmailValueObject;
 sub factory {
   my ( $self, $args ) = @_;
 
+  unless ($args) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
+  unless (reftype($args) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
   my $maybe_email = Core::Common::ValueObjects::EmailValueObject->factory($args->{email});
 
-  return $maybe_email if $maybe_email->isa('Core::Common::Errors::DomainError');
+  if ($maybe_email->isa('Core::Common::Errors::DomainError')) {
+    return $maybe_email;
+  }
 
   return Core::ConfirmationCode::ConfirmationCodeEntity->new({
     'email' => $maybe_email,

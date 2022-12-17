@@ -8,11 +8,13 @@ use Crypt::Password;
 sub factory {
   my ( $self, $arg ) = @_;
 
-  return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
-    unless $arg;
+  unless ($arg) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'});
+  }
 
-  return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'}) 
-    unless $arg =~ /[A-Za-z0-9\.\,\!\?\$\@\&\-\*\_]{5,15}+$/g;
+  unless ($arg =~ /[A-Za-z0-9\.\,\!\?\$\@\&\-\*\_]{5,15}+$/g) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid password'});
+  }
 
   return Core::User::ValueObjects::PasswordValueObject->new({'value' =>  password($arg)});
 }
@@ -20,8 +22,9 @@ sub factory {
 sub validate {
   my ( $self, $args ) = @_;
   
-  return Core::Common::Errors::DomainError->new({'message' => 'Wrong password'})
-    unless check_password($self->value, $args);
+  unless (check_password($self->value, $args)) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Wrong password'});
+  }
 
   return 1;
 }

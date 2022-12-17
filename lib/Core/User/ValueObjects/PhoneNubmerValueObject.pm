@@ -8,11 +8,13 @@ use Crypt::Password;
 sub factory {
   my ( $self, $arg ) = @_;
 
-  return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
-    unless $arg;
+  unless ($arg) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'});
+  }
 
-  return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'}) 
-    unless $arg =~ /\+79[0-9]{2,2}[0-9]{7,7}+$/g;
+  unless ($arg =~ /\+79[0-9]{2,2}[0-9]{7,7}+$/g) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid phone number'});
+  }
 
   return Core::User::ValueObjects::PhoneNubmerValueObject->new({'value' => $arg});
 }

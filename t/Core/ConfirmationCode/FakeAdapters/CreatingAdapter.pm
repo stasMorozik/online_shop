@@ -7,8 +7,9 @@ use Core::ConfirmationCode::ConfirmationCodeEntity;
 sub create {
   my ( $self, $arg ) = @_;
 
-  return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid user'})
-    unless $arg->isa('Core::ConfirmationCode::ConfirmationCodeEntity');
+  unless ($arg->isa('Core::ConfirmationCode::ConfirmationCodeEntity')) {
+    return Core::Common::Errors::InfrastructureError->new({'message' => 'Invalid code'});
+  }
 
   $self->codes->{$arg->email->value} = $arg; 
 

@@ -1,4 +1,4 @@
-package Core::ConfirmationCode::CreatingUseCaseTest;
+package Core::ConfirmationCode::TestCreatingUseCase;
 
 use strict;
 use warnings;
@@ -9,10 +9,11 @@ use Test::More;
 use Data::Dump;
 use Try::Tiny;
 
-use Core::ConfirmationCode::UseCases::CreatingUseCase;
-use Core::Common::FakeAdapters::NotifyingAdapter;
-use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
 use Core::Common::Errors::DomainError;
+
+use Core::Common::FakeAdapters::NotifyingAdapter;
+use Core::ConfirmationCode::UseCases::CreatingUseCase;
+use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
 
 my $use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'creating_port' => Core::ConfirmationCode::FakeAdapters::CreatingAdapter->new({
@@ -21,13 +22,24 @@ my $use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'notifying_port' => Core::Common::FakeAdapters::NotifyingAdapter->new()
 });
 
-ok($use_case->isa('Core::ConfirmationCode::UseCases::CreatingUseCase') eq 1, 'New Create Use Case');
+ok($use_case->isa('Core::ConfirmationCode::UseCases::CreatingUseCase') eq 1, 'New Creating Code Use Case');
 
 my $maybe_true = $use_case->create({
   'email' => 'name@gmail.com'
 });
 
 ok($maybe_true eq 1, 'Create new Code');
+
+
+$maybe_true = $use_case->create({
+  'email' => 'name@'
+});
+
+ok($maybe_true->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid email');
+
+$maybe_true = $use_case->create({});
+
+ok($maybe_true->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
 
 $use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({

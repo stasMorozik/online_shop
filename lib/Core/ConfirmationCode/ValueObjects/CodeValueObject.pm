@@ -13,8 +13,9 @@ sub factory {
 sub validate {
   my ( $self, $arg ) = @_;
   
-  return Core::Common::Errors::DomainError->new({'message' => 'Wrong confirmation code'})
-    if ($self->value !=  $arg);
+  if ($self->value !=  $arg) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Wrong confirmation code'});
+  }
 
   return 1;
 }

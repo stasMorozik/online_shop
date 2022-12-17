@@ -9,7 +9,6 @@ use Data::Dump;
 sub factory {
   my ( $self, $args ) = @_;
 
-
   unless ($args) {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'})
   }
@@ -35,11 +34,11 @@ sub factory {
   }
 
   unless (blessed $args->{notifying_port}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid creating port'});   
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid notifying port'});   
   }
 
   unless ($args->{notifying_port}->can('notify')) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Test'});
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid notifying port'});
   }
 
   return Core::ConfirmationCode::UseCases::CreatingUseCase->new({
