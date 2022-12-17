@@ -50,6 +50,14 @@ sub factory {
 sub create {
   my ( $self, $args ) = @_;
 
+  unless ($args) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
+  unless (reftype($args) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
   my $maybe_code = Core::ConfirmationCode::ConfirmationCodeEntity->factory($args);
 
   if ($maybe_code->isa('Core::Common::Errors::DomainError')) {

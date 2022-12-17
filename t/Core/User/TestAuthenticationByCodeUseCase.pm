@@ -1,4 +1,4 @@
-package Core::User::TestAuthenticationByPasswordUseCase;
+package Core::User::TestAuthenticationByCodeUseCase;
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use JSON::WebToken;
 
 use Core::Common::Errors::DomainError;
 use Core::Common::Errors::InfrastructureError;
-use Core::User::UseCases::AuthenticationByPasswordUseCase;
+use Core::User::UseCases::AuthenticationByCodeUseCase;
 use Core::ConfirmationCode::UseCases::CreatingUseCase;
 use Core::User::UseCases::RegistrationUseCase;
 
@@ -19,12 +19,13 @@ use Core::Common::FakeAdapters::NotifyingAdapter;
 use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
 use Core::User::FakeAdapters::CreatingAdapter;
 use Core::ConfirmationCode::FakeAdapters::GettingAdapter;
+use Core::ConfirmationCode::FakeAdapters::GettingWithDeletingAdapter;
 use Core::User::FakeAdapters::GettingByEmailAdapter;
 
 my $codes = {};
 my $users = {};
 
-require_ok( 'Core::User::UseCases::AuthenticationByPasswordUseCase' );
+require_ok( 'Core::User::UseCases::AuthenticationByCodeUseCase' );
 
 my $creating_code_use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'creating_port' => Core::ConfirmationCode::FakeAdapters::CreatingAdapter->new({
@@ -59,34 +60,45 @@ $maybe_true = $registration_use_case->registry({
 
 my $secret = 'some_secret';
 
-my $auth_use_case = Core::User::UseCases::AuthenticationByPasswordUseCase->factory({
-  'getting_user_by_email_port' => Core::User::FakeAdapters::GettingByEmailAdapter->new({'users' => $users}),
+my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
+  'getting_user_by_email_port' => Core::User::FakeAdapters::GettingByEmailAdapter->new({
+    'users' => $users
+  }),
+  'getting_confirmation_code_port' => Core::ConfirmationCode::FakeAdapters::GettingWithDeletingAdapter->new({
+    'codes' => $codes
+  }),
   'secret_key' => $secret
 });
 
-ok($auth_use_case->isa('Core::User::UseCases::AuthenticationByPasswordUseCase') eq 1, 'New Auth Use Case');
+ok($auth_use_case->isa('Core::User::UseCases::AuthenticationByCodeUseCase') eq 1, 'New Auth Use Case');
 
-my $invalid_auth_use_case = Core::User::UseCases::AuthenticationByPasswordUseCase->factory({});
+my $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({});
 
 ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
 
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByPasswordUseCase->factory({
+$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'getting_user_by_email_port' => {},
-  'secret_key' => ''
+  'getting_confirmation_code_port' => {},
+  'secret_key' => 1
 });
 
 ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
 
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByPasswordUseCase->factory({
-  'getting_user_by_email_port' => 1,
-  'secret_key' => 12
+$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
+  'getting_user_by_email_port' => 12,
+  'getting_confirmation_code_port' => '1',
+  'secret_key' => 1
 });
 
 ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
+
+$maybe_true = $creating_code_use_case->create({
+  'email' => 'name@gmail.com'
+});
 
 my $maybe_token = $auth_use_case->auth({
   'email' => 'name@gmail.com',
-  'password' => 'qwerty12345'
+  'code' => $codes->{'name@gmail.com'}->code->value
 });
 
 unless (ref($maybe_token) eq "HASH") {
@@ -97,19 +109,23 @@ unless (ref($maybe_token) eq "HASH") {
   ok(($got->{iss} eq 'name@gmail.com') eq 1, 'Verification JWT'); 
 }
 
-$maybe_token = $auth_use_case->auth({
-  'email' => 'name@gmail.com',
-  'password' => 'qwerty'
+$maybe_true = $creating_code_use_case->create({
+  'email' => 'name@gmail.com'
 });
 
-ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Wrong password');
+$maybe_token = $auth_use_case->auth({
+  'email' => 'name@gmail.com',
+  'code' => 123
+});
+
+ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Wrong code');
 
 $maybe_token = $auth_use_case->auth({
   'email' => 'name1@gmail.com',
-  'password' => 'qwerty'
+  'code' => 123
 });
 
-ok($maybe_token->isa('Core::Common::Errors::InfrastructureError') eq 1, 'User not found');
+ok($maybe_token->isa('Core::Common::Errors::InfrastructureError') eq 1, 'Code not found');
 
 $maybe_token = $auth_use_case->auth();
 

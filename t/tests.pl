@@ -10,5 +10,6 @@ use Core::ConfirmationCode::TestConfirmationCodeEntity;
 use Core::ConfirmationCode::TestCreatingUseCase;
 use Core::User::TestRegistrationUseCase;
 use Core::User::TestAuthenticationByPasswordUseCase;
+use Core::User::TestAuthenticationByCodeUseCase;
 
-done_testing(65);
+done_testing(77);

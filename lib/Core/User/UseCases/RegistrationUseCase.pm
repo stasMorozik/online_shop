@@ -68,8 +68,8 @@ sub registry {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
   }
 
-  unless ($args->{code}) {
-    return Core::Common::Errors::DomainError->new({'message' => 'Invalid code'});
+  unless (reftype($args) eq "HASH") {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
   }
 
   my $maybe_user = Core::User::UserEntity->factory($args);
