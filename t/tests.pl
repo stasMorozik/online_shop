@@ -12,5 +12,9 @@ use Core::ConfirmationCode::TestCreatingUseCase;
 use Core::User::TestRegistrationUseCase;
 use Core::User::TestAuthenticationByPasswordUseCase;
 use Core::User::TestAuthenticationByCodeUseCase;
+use Core::User::TestRefreshTokenUseCase;
+use Core::User::TestAuthorizationUseCase;
 
-done_testing(84);
+use PostgresAdapters::User::TestCreatingAdapter;
+
+done_testing(106);

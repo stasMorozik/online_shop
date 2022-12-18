@@ -1,6 +1,7 @@
 package Core::User::UserEntity;
 
 use Moo;
+use Time::Piece;
 use Scalar::Util qw(reftype);
 use UUID::Generator::PurePerl;
 
@@ -60,7 +61,8 @@ sub factory {
     'last_name' => $maybe_last_name,
     'email' => $maybe_email,
     'password' => $maybe_password,
-    'phone' => $maybe_phone
+    'phone' => $maybe_phone,
+    'created' => localtime->strftime('%Y-%m-%d')
   });
 }
 
@@ -136,6 +138,10 @@ has phone => (
 );
 
 has password => (
+  is => 'ro'
+);
+
+has created => (
   is => 'ro'
 );
 

@@ -1,4 +1,4 @@
-package Core::User::TestAuthenticationByCodeUseCase;
+package Core::User::TestRefreshTokenUseCase;
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ use Core::User::FakeAdapters::GettingByEmailAdapter;
 my $codes = {};
 my $users = {};
 
-require_ok( 'Core::User::UseCases::AuthenticationByCodeUseCase' );
+require_ok( 'Core::User::UseCases::RefreshTokenUseCase' );
 
 my $creating_code_use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'creating_port' => Core::ConfirmationCode::FakeAdapters::CreatingAdapter->new({
@@ -72,29 +72,41 @@ my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'refresh_secret_key' => $refresh_secret
 });
 
-ok($auth_use_case->isa('Core::User::UseCases::AuthenticationByCodeUseCase') eq 1, 'New Auth Use Case');
-
-my $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({});
-
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
-
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
-  'getting_user_by_email_port' => {},
-  'getting_confirmation_code_port' => {},
+my $refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory({
   'secret_key' => $secret,
   'refresh_secret_key' => $refresh_secret
 });
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
+ok($refresh_token_use_case->isa('Core::User::UseCases::RefreshTokenUseCase') eq 1, 'New Refresh Token Use Case');
 
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
-  'getting_user_by_email_port' => 12,
-  'getting_confirmation_code_port' => '1',
-  'secret_key' => 0,
-  'refresh_secret_key' => 0
+my $invalid_refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory({});
+
+ok($invalid_refresh_token_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+
+$invalid_refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory({
+  'secret_key' => '',
+  'refresh_secret_key' => ''
 });
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+ok($invalid_refresh_token_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+
+$invalid_refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory({
+  'secret_key' => '123',
+  'refresh_secret_key' => ''
+});
+
+ok($invalid_refresh_token_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+
+$invalid_refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory({
+  'secret_key' => '',
+  'refresh_secret_key' => '123'
+});
+
+ok($invalid_refresh_token_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+
+$invalid_refresh_token_use_case = Core::User::UseCases::RefreshTokenUseCase->factory();
+
+ok($invalid_refresh_token_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
 $maybe_true = $creating_code_use_case->create({
   'email' => 'name@gmail.com'
@@ -105,28 +117,16 @@ my $maybe_token = $auth_use_case->auth({
   'code' => $codes->{'name@gmail.com'}->code->value
 });
 
-ok($maybe_token->isa('Core::User::TokenEntity') eq 1, 'New token');
-
-$maybe_true = $creating_code_use_case->create({
-  'email' => 'name@gmail.com'
+$maybe_token = $refresh_token_use_case->refresh({
+  'refresh_token' => $maybe_token->refresh_token
 });
 
-$maybe_token = $auth_use_case->auth({
-  'email' => 'name@gmail.com',
-  'code' => 123
+ok($maybe_token->isa('Core::User::TokenEntity') eq 1, 'New refreshed token');
+
+$maybe_token = $refresh_token_use_case->refresh({
+  'refresh_token' => '123'
 });
 
-ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Wrong code');
-
-$maybe_token = $auth_use_case->auth({
-  'email' => 'name1@gmail.com',
-  'code' => 123
-});
-
-ok($maybe_token->isa('Core::Common::Errors::InfrastructureError') eq 1, 'Code not found');
-
-$maybe_token = $auth_use_case->auth();
-
-ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid data');
+ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid refreshed token');
 
 1;

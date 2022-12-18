@@ -8,6 +8,8 @@ requires 'UUID::Generator::PurePerl';
 requires 'Data::Validate::UUID';
 requires 'Crypt::Random';
 requires 'JSON::WebToken';
+requires 'Rose::DB::Object';
+requires 'DBD::Pg';
 
 feature 'Test::More', 'Test::More support' => sub {
     requires 'Test::More';

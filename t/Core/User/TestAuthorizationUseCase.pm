@@ -1,4 +1,4 @@
-package Core::User::TestAuthenticationByCodeUseCase;
+package Core::User::TestAuthorizationUseCase;
 
 use strict;
 use warnings;
@@ -14,6 +14,7 @@ use Core::User::UseCases::AuthenticationByCodeUseCase;
 use Core::ConfirmationCode::UseCases::CreatingUseCase;
 use Core::User::UseCases::RegistrationUseCase;
 use Core::User::TokenEntity;
+use Core::User::UserEntity;
 
 use Core::Common::FakeAdapters::NotifyingAdapter;
 use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
@@ -25,7 +26,7 @@ use Core::User::FakeAdapters::GettingByEmailAdapter;
 my $codes = {};
 my $users = {};
 
-require_ok( 'Core::User::UseCases::AuthenticationByCodeUseCase' );
+require_ok( 'Core::User::UseCases::AuthorizationUseCase' );
 
 my $creating_code_use_case = Core::ConfirmationCode::UseCases::CreatingUseCase->factory({
   'creating_port' => Core::ConfirmationCode::FakeAdapters::CreatingAdapter->new({
@@ -61,10 +62,10 @@ $maybe_true = $registration_use_case->registry({
 my $secret = 'some_secret';
 my $refresh_secret = 'some_refresh_secret';
 
+my $getting_user_by_email_port = Core::User::FakeAdapters::GettingByEmailAdapter->new({'users' => $users});
+
 my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
-  'getting_user_by_email_port' => Core::User::FakeAdapters::GettingByEmailAdapter->new({
-    'users' => $users
-  }),
+  'getting_user_by_email_port' => $getting_user_by_email_port,
   'getting_confirmation_code_port' => Core::ConfirmationCode::FakeAdapters::GettingWithDeletingAdapter->new({
     'codes' => $codes
   }),
@@ -72,29 +73,24 @@ my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'refresh_secret_key' => $refresh_secret
 });
 
-ok($auth_use_case->isa('Core::User::UseCases::AuthenticationByCodeUseCase') eq 1, 'New Auth Use Case');
-
-my $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({});
-
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
-
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
-  'getting_user_by_email_port' => {},
-  'getting_confirmation_code_port' => {},
+my $authorization_use_case = Core::User::UseCases::AuthorizationUseCase->factory({
   'secret_key' => $secret,
-  'refresh_secret_key' => $refresh_secret
+  'getting_user_by_email_port' => $getting_user_by_email_port
 });
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
+ok($authorization_use_case->isa('Core::User::UseCases::AuthorizationUseCase') eq 1, 'New Authorization Use Case');
 
-$invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
-  'getting_user_by_email_port' => 12,
-  'getting_confirmation_code_port' => '1',
-  'secret_key' => 0,
-  'refresh_secret_key' => 0
+
+my $invalid_authorization_use_case = Core::User::UseCases::AuthorizationUseCase->factory({});
+
+ok($invalid_authorization_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+
+$invalid_authorization_use_case = Core::User::UseCases::AuthorizationUseCase->factory({
+  'secret_key' => $secret,
+  'getting_user_by_email_port' => {}
 });
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
+ok($invalid_authorization_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid port');
 
 $maybe_true = $creating_code_use_case->create({
   'email' => 'name@gmail.com'
@@ -105,28 +101,25 @@ my $maybe_token = $auth_use_case->auth({
   'code' => $codes->{'name@gmail.com'}->code->value
 });
 
-ok($maybe_token->isa('Core::User::TokenEntity') eq 1, 'New token');
-
-$maybe_true = $creating_code_use_case->create({
-  'email' => 'name@gmail.com'
+my $user = $authorization_use_case->auth({
+  'token' => $maybe_token->token
 });
 
-$maybe_token = $auth_use_case->auth({
-  'email' => 'name@gmail.com',
-  'code' => 123
+ok($user->isa('Core::User::UserEntity') eq 1, 'Authorization User');
+
+$user = $authorization_use_case->auth({
+  'token' => '123'
 });
 
-ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Wrong code');
+ok($user->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid token');
 
-$maybe_token = $auth_use_case->auth({
-  'email' => 'name1@gmail.com',
-  'code' => 123
-});
 
-ok($maybe_token->isa('Core::Common::Errors::InfrastructureError') eq 1, 'Code not found');
+$user = $authorization_use_case->auth({});
 
-$maybe_token = $auth_use_case->auth();
+ok($user->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
-ok($maybe_token->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid data');
+$user = $authorization_use_case->auth();
+
+ok($user->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
 1;

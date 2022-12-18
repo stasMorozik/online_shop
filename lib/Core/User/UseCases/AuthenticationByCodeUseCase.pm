@@ -2,13 +2,11 @@ package Core::User::UseCases::AuthenticationByCodeUseCase;
 
 use Moo;
 use Scalar::Util qw(reftype blessed);
-use JSON::WebToken;
 use Core::User::UserEntity;
 use Core::User::TokenEntity;
 use Core::Common::ValueObjects::EmailValueObject;
 use Core::ConfirmationCode::ConfirmationCodeEntity;
 use Core::Common::Errors::DomainError;
-use Core::Common::Errors::InfrastructureError;
 
 sub factory {
   my ( $self, $args ) = @_;

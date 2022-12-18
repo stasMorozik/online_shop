@@ -7,7 +7,6 @@ use lib '../lib';
 
 use Test::More;
 use Data::Dump;
-use JSON::WebToken;
 
 use Core::Common::Errors::DomainError;
 use Core::Common::Errors::InfrastructureError;

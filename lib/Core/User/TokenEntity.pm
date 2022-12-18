@@ -7,6 +7,7 @@ use Try::Tiny;
 
 use Core::User::UserEntity;
 use Core::Common::Errors::DomainError;
+use Core::Common::ValueObjects::EmailValueObject;
 
 sub factory {
   my ( $self, $args ) = @_;
@@ -112,6 +113,45 @@ sub refresh {
       $args->{refresh_secret_key}
     )
   });
+}
+
+
+sub parse {
+  my ( $self, $args ) = @_;
+
+  unless ($args) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid argument'});
+  }
+
+  unless ($args->{secret_key}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid secret key'});
+  }
+
+  unless ($args->{token}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid token'});
+  }
+
+  my $claims;
+  
+  try {
+    $claims = decode_jwt($args->{token}, $args->{secret_key});
+  } catch {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid token'});
+  };
+
+  unless ($claims->{iss}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid token'});
+  }
+
+  unless ($claims->{exp}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid token'});
+  }
+
+  if (time() >= $claims->{exp}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid token'});
+  }
+
+  return Core::Common::ValueObjects::EmailValueObject->factory($claims->{iss});
 }
 
 has token => (

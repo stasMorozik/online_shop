@@ -10,6 +10,7 @@ use Data::Dump;
 
 use Core::User::UserEntity;
 use Core::Common::Errors::DomainError;
+use Core::Common::ValueObjects::EmailValueObject;
 
 require_ok( 'Core::User::TokenEntity' );
 
@@ -87,5 +88,25 @@ $invalid_token = $token->refresh({
 });
 
 ok($invalid_token->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid refresh token');
+
+$token = Core::User::TokenEntity->factory({
+  'user' => $user,
+  'secret_key' => 'some_secret_key',
+  'refresh_secret_key' => 'some_refresh_secret_key'
+});
+
+my $email = $token->parse({
+  'secret_key' => 'some_secret_key',
+  'token' => $token->token
+});
+
+ok($email->isa('Core::Common::ValueObjects::EmailValueObject') eq 1, 'Parse token');
+
+$email = $token->parse({
+  'secret_key' => 'some_secret_key',
+  'token' => '123'
+});
+
+ok($email->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid parse token');
 
 1;
