@@ -4,6 +4,7 @@ use Moo;
 use Scalar::Util qw(reftype blessed);
 use JSON::WebToken;
 use Core::User::UserEntity;
+use Core::User::TokenEntity;
 use Core::Common::ValueObjects::EmailValueObject;
 use Core::User::ValueObjects::PasswordValueObject;
 use Core::Common::Errors::DomainError;
@@ -24,6 +25,10 @@ sub factory {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid secret key'})
   }
 
+  unless ($args->{refresh_secret_key}) {
+    return Core::Common::Errors::DomainError->new({'message' => 'Invalid refresh secret key'})
+  }
+
   unless ($args->{getting_user_by_email_port}) {
     return Core::Common::Errors::DomainError->new({'message' => 'Invalid getting port'});
   }
@@ -38,7 +43,8 @@ sub factory {
 
   return Core::User::UseCases::AuthenticationByPasswordUseCase->new({
     'getting_user_by_email_port' => $args->{getting_user_by_email_port},
-    'secret_key' => $args->{secret_key}
+    'secret_key' => $args->{secret_key},
+    'refresh_secret_key' => $args->{refresh_secret_key}
   });
 }
 
@@ -77,13 +83,11 @@ sub auth {
     return $maybe_true; 
   }
   
-  return encode_jwt(
-    {
-      'iss' => $maybe_user->email->value,
-      'exp' => time() + 600
-    }, 
-    $self->secret_key
-  );
+  return Core::User::TokenEntity->factory({
+    'user' => $maybe_user,
+    'secret_key' => $self->secret_key,
+    'refresh_secret_key' => $self->refresh_secret_key
+  });
 }
 
 has getting_user_by_email_port => (
@@ -91,6 +95,10 @@ has getting_user_by_email_port => (
 );
 
 has secret_key => (
+  is => 'ro'
+);
+
+has refresh_secret_key => (
   is => 'ro'
 );
 

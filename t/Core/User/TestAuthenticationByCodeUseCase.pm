@@ -14,6 +14,7 @@ use Core::Common::Errors::InfrastructureError;
 use Core::User::UseCases::AuthenticationByCodeUseCase;
 use Core::ConfirmationCode::UseCases::CreatingUseCase;
 use Core::User::UseCases::RegistrationUseCase;
+use Core::User::TokenEntity;
 
 use Core::Common::FakeAdapters::NotifyingAdapter;
 use Core::ConfirmationCode::FakeAdapters::CreatingAdapter;
@@ -59,6 +60,7 @@ $maybe_true = $registration_use_case->registry({
 });
 
 my $secret = 'some_secret';
+my $refresh_secret = 'some_refresh_secret';
 
 my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'getting_user_by_email_port' => Core::User::FakeAdapters::GettingByEmailAdapter->new({
@@ -67,19 +69,21 @@ my $auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'getting_confirmation_code_port' => Core::ConfirmationCode::FakeAdapters::GettingWithDeletingAdapter->new({
     'codes' => $codes
   }),
-  'secret_key' => $secret
+  'secret_key' => $secret,
+  'refresh_secret_key' => $refresh_secret
 });
 
 ok($auth_use_case->isa('Core::User::UseCases::AuthenticationByCodeUseCase') eq 1, 'New Auth Use Case');
 
 my $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({});
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
+ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
 $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'getting_user_by_email_port' => {},
   'getting_confirmation_code_port' => {},
-  'secret_key' => 1
+  'secret_key' => $secret,
+  'refresh_secret_key' => $refresh_secret
 });
 
 ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
@@ -87,10 +91,11 @@ ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Inval
 $invalid_auth_use_case = Core::User::UseCases::AuthenticationByCodeUseCase->factory({
   'getting_user_by_email_port' => 12,
   'getting_confirmation_code_port' => '1',
-  'secret_key' => 1
+  'secret_key' => 0,
+  'refresh_secret_key' => 0
 });
 
-ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid ports');
+ok($invalid_auth_use_case->isa('Core::Common::Errors::DomainError') eq 1, 'Invalid argument');
 
 $maybe_true = $creating_code_use_case->create({
   'email' => 'name@gmail.com'
@@ -101,13 +106,7 @@ my $maybe_token = $auth_use_case->auth({
   'code' => $codes->{'name@gmail.com'}->code->value
 });
 
-unless (ref($maybe_token) eq "HASH") {
-  ok($maybe_token ? 1 : 0 eq 1, 'Authentication User'); 
-
-  my $got = decode_jwt($maybe_token, $secret);
-  
-  ok(($got->{iss} eq 'name@gmail.com') eq 1, 'Verification JWT'); 
-}
+ok($maybe_token->isa('Core::User::TokenEntity') eq 1, 'New token');
 
 $maybe_true = $creating_code_use_case->create({
   'email' => 'name@gmail.com'
