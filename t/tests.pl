@@ -5,16 +5,17 @@ use lib '../t';
 
 use Test::More;
 
-use Core::User::TestUserEntity;
-use Core::User::TestTokenEntity;
-use Core::ConfirmationCode::TestConfirmationCodeEntity;
-use Core::ConfirmationCode::TestCreatingUseCase;
-use Core::User::TestRegistrationUseCase;
-use Core::User::TestAuthenticationByPasswordUseCase;
-use Core::User::TestAuthenticationByCodeUseCase;
-use Core::User::TestRefreshTokenUseCase;
-use Core::User::TestAuthorizationUseCase;
+use Core::User::TestEntity;
+use Core::ConfirmationCode::TestEntity;
+use Core::ConfirmationCode::TestCreating;
+use Core::Token::TestEntity;
+use Core::Token::TestRefreshToken;
+use Core::User::TestRegistration;
+use Core::User::TestAuthenticationByPassword;
+use Core::User::TestAuthenticationByCode;
+use Core::User::TestAuthorization;
 
-use PostgresAdapters::User::TestCreatingAdapter;
+use PostgresAdapters::User::TestCreating;
+use PostgresAdapters::User::TestGettingByEmail;
 
-done_testing(106);
+done_testing(113);
