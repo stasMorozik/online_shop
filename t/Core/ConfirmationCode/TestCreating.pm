@@ -5,72 +5,77 @@ use warnings;
 
 use lib '../lib';
 
+use Try::Tiny;
 use Test::More;
 use Data::Dump;
 
-use Core::Common::Errors::Domain;
-
-use Core::Common::FakeAdapters::Notifying;
-use Core::ConfirmationCode::UseCases::Creating;
-use Core::ConfirmationCode::FakeAdapters::Creating;
-use Core::ConfirmationCode::FakeAdapters::Getting;
-
 require_ok( 'Core::ConfirmationCode::UseCases::Creating' );
+require_ok( 'Core::ConfirmationCode::Fake::Getting' );
+require_ok( 'Core::ConfirmationCode::Fake::Creating' );
+require_ok( 'Core::ConfirmationCode::Fake::Notifying' );
 
 my $codes = {};
 
-my $use_case = Core::ConfirmationCode::UseCases::Creating->factory({
-  'creating_port' => Core::ConfirmationCode::FakeAdapters::Creating->new({
-    'codes' => $codes
-  }),
-  'getting_port' => Core::ConfirmationCode::FakeAdapters::Getting->new({
-    'codes' => $codes
-  }),
-  'notifying_port' => Core::Common::FakeAdapters::Notifying->new()
+my $getting_adapter = Core::ConfirmationCode::Fake::Getting->new({'codes' => $codes});
+my $creating_adapter = Core::ConfirmationCode::Fake::Creating->new({'codes' => $codes});
+my $notifying_adapter = Core::ConfirmationCode::Fake::Notifying->new();
+
+ok($getting_adapter->isa('Core::ConfirmationCode::Fake::Getting') eq 1, 'New getting confirmation code adapter');
+ok($creating_adapter->isa('Core::ConfirmationCode::Fake::Creating') eq 1, 'New creating confirmation code adapter');
+ok($notifying_adapter->isa('Core::ConfirmationCode::Fake::Notifying') eq 1, 'New notifying adapter');
+
+my $use_case = Core::ConfirmationCode::UseCases::Creating->new({
+  'getting_port' => $getting_adapter,
+  'creating_port' => $creating_adapter,
+  'notifying_port' => $notifying_adapter,
 });
 
-ok($use_case->isa('Core::ConfirmationCode::UseCases::Creating') eq 1, 'New Creating Code Use Case');
+ok($use_case->isa('Core::ConfirmationCode::UseCases::Creating') eq 1, 'New creating confirmation code use case');
 
-my $maybe_true = $use_case->create({
-  'email' => 'name@gmail.com'
-});
+try {
+  Core::ConfirmationCode::UseCases::Creating->new({
+    'getting_port' => 1,
+    'creating_port' => $creating_adapter,
+    'notifying_port' => $notifying_adapter,
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::Domain') eq 1, 'Invalid port');
+};
 
-ok($maybe_true eq 1, 'Create new Code');
+try {
+  Core::ConfirmationCode::UseCases::Creating->new({
+    'getting_port' => $getting_adapter,
+    'creating_port' => 1,
+    'notifying_port' => $notifying_adapter,
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::Domain') eq 1, 'Invalid port');
+};
 
+try {
+  Core::ConfirmationCode::UseCases::Creating->new({
+    'getting_port' => $getting_adapter,
+    'creating_port' => $creating_adapter,
+    'notifying_port' => 1,
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::Domain') eq 1, 'Invalid port');
+};
 
-$maybe_true = $use_case->create({
-  'email' => 'name@'
-});
+try {
+  Core::ConfirmationCode::UseCases::Creating->new({
+    'getting_port' => 0,
+    'creating_port' => '',
+    'notifying_port' => 1,
+  });
+} catch {
+  ok($_->isa('Core::Common::Errors::Domain') eq 1, 'Invalid port');
+};
 
-ok($maybe_true->isa('Core::Common::Errors::Domain') eq 1, 'Invalid email');
+my $maybe_true = $use_case->create('name@gmail.com');
 
-$maybe_true = $use_case->create({});
+ok($maybe_true->is_right() eq 1, 'Created confirmation port');
 
-ok($maybe_true->isa('Core::Common::Errors::Domain') eq 1, 'Invalid argument');
+$maybe_true = $use_case->create('name@gmail.');
 
-
-$use_case = Core::ConfirmationCode::UseCases::Creating->factory({
-  'creating_port' => {},
-  'notifying_port' => {},
-  'getting_port' => {},
-});
-
-ok($use_case->isa('Core::Common::Errors::Domain') eq 1, 'Invalid ports');
-
-
-$use_case = Core::ConfirmationCode::UseCases::Creating->factory();
-
-ok($use_case->isa('Core::Common::Errors::Domain') eq 1, 'Invalid ports');
-
-$use_case = Core::ConfirmationCode::UseCases::Creating->factory({
-  'creating_port' => 1,
-  'notifying_port' => '',
-  'getting_port' => 0,
-});
-
-ok($use_case->isa('Core::Common::Errors::Domain') eq 1, 'Invalid ports');
-
-1;
-
-
-
+ok($maybe_true->is_left() eq 1, 'Invalid email');

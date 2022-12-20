@@ -7,31 +7,43 @@ use lib '../lib';
 
 use Test::More;
 use Data::Dump;
-use Core::Common::Errors::Domain;
 
 require_ok( 'Core::ConfirmationCode::Entity' );
+require_ok( 'Core::Common::ValueObjects::Email' );
 
-my $code = Core::ConfirmationCode::Entity->factory({
-  'email' => 'name@gmail.com'
-});
+my $email = Core::Common::ValueObjects::Email->factory('name@gmail.com');
 
-ok($code->isa('Core::ConfirmationCode::Entity') eq 1, 'New Code');
+ok($email->is_right() eq 1, 'New email');
 
+my $code = Core::ConfirmationCode::Entity->factory($email->value);
 
-$code = Core::ConfirmationCode::Entity->factory({
-  'email' => 'name'
-});
-
-ok($code->isa('Core::Common::Errors::Domain') eq 1, 'Invalid email');
+ok($code->is_right() eq 1, 'New code');
 
 $code = Core::ConfirmationCode::Entity->factory({
-  'email' => 'name@gmail.com'
+  email => 'name@gmail.'
 });
 
-ok($code->validate_code($code->code->value) eq 1, 'Validate code');
+ok($code->is_left() eq 1, 'Invalid email');
 
-my $maybe_true = $code->validate_code(123);
+$code = Core::ConfirmationCode::Entity->factory();
 
-ok($maybe_true->isa('Core::Common::Errors::Domain') eq 1, 'Wrong code');
+ok($code->is_left() eq 1, 'Invalid email');
 
-1;
+$code = Core::ConfirmationCode::Entity->factory($email->value);
+
+my $maybe_true = $code->value->check_lifetime();
+
+ok($maybe_true->is_left() eq 1, 'Code already exists');
+
+
+$maybe_true = $code->value->confirm($code->value->code);
+
+ok($maybe_true->is_right() eq 1, 'Confirm code');
+
+$maybe_true = $code->value->confirm(123);
+
+ok($maybe_true->is_left() eq 1, 'Wrong code');
+
+$maybe_true = $code->value->confirm();
+
+ok($maybe_true->is_left() eq 1, 'Wrong code');

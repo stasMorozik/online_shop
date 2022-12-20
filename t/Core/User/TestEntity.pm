@@ -7,7 +7,6 @@ use lib '../lib';
 
 use Test::More;
 use Data::Dump;
-use Core::Common::Errors::Domain
 
 require_ok( 'Core::User::Entity' );
 
@@ -19,7 +18,7 @@ my $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'New User');
+ok($user->is_right() eq 1, 'New User');
 
 $user = Core::User::Entity->factory({
   'nam' => 'Some',
@@ -29,7 +28,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Empty name');
+ok($user->is_left() eq 1, 'Empty name');
 
 
 $user = Core::User::Entity->factory({
@@ -40,7 +39,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid name');
+ok($user->is_left() eq 1, 'Invalid name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай',
@@ -50,7 +49,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай-Яркий',
@@ -60,7 +59,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай-яркий',
@@ -70,7 +69,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай-яркий',
@@ -80,7 +79,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай Яркий',
@@ -90,7 +89,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай яркий',
@@ -100,7 +99,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Russian name');
+ok($user->is_right() eq 1, 'Russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай яркий1',
@@ -110,7 +109,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid russian name');
+ok($user->is_left() eq 1, 'Invalid russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Николай-яркий1',
@@ -120,7 +119,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid russian name');
+ok($user->is_left() eq 1, 'Invalid russian name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Sqwertyuiopasdfghjklzxcvbnmqasdf',
@@ -130,7 +129,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Soo long name');
+ok($user->is_left() eq 1, 'Soo long name');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -140,17 +139,17 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Empty email');
+ok($user->is_left() eq 1, 'Empty email');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
   'last_name' => 'Last', 
-  'email' => 'name@gmail.', 
+  'email' => 'name1', 
   'password' => 'qwe-rty!12$', 
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid email');
+ok($user->is_left() eq 1, 'Invalid email');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -160,7 +159,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid email');
+ok($user->is_left() eq 1, 'Invalid email');
 
 
 $user = Core::User::Entity->factory({
@@ -171,7 +170,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::User::Entity') eq 1, 'Valid password');
+ok($user->is_right() eq 1, 'Valid password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -181,7 +180,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Empty password');
+ok($user->is_left() eq 1, 'Empty password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -191,7 +190,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid password');
+ok($user->is_left() eq 1, 'Invalid password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -201,7 +200,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid password');
+ok($user->is_left() eq 1, 'Invalid password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -211,7 +210,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Soo long password');
+ok($user->is_left() eq 1, 'Soo long password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -221,7 +220,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Soo short password');
+ok($user->is_left() eq 1, 'Soo short password');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some', 
@@ -231,7 +230,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+7968345678'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid phone number');
+ok($user->is_left() eq 1, 'Invalid phone number');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some', 
@@ -241,7 +240,7 @@ $user = Core::User::Entity->factory({
   'phone' => '+796834567826'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid phone number');
+ok($user->is_left() eq 1, 'Invalid phone number');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -252,7 +251,7 @@ $user = Core::User::Entity->factory({
   'phone' => '79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid phone number');
+ok($user->is_left() eq 1, 'Invalid phone number');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -262,7 +261,7 @@ $user = Core::User::Entity->factory({
   'phone' => 79683456782
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Invalid phone number');
+ok($user->is_left() eq 1, 'Invalid phone number');
 
 $user = Core::User::Entity->factory({
   'name' => 'Some',
@@ -272,7 +271,7 @@ $user = Core::User::Entity->factory({
   'phon' => '+79683456782'
 });
 
-ok($user->isa('Core::Common::Errors::Domain') eq 1, 'Empty phone number');
+ok($user->is_left() eq 1, 'Empty phone number');
 
 
 $user = Core::User::Entity->factory({
@@ -283,21 +282,32 @@ $user = Core::User::Entity->factory({
   'phone' => '+79683456782'
 });
 
-ok($user->validate_password('qwe-rty!12$') eq 1, 'Validate password');
+my $maybe_true = $user->value->validate_password('qwe-rty!12$');
 
-my $maybe_true = $user->validate_password('1234567');
+ok($maybe_true->is_right() eq 1, 'Validate password');
 
-ok($maybe_true->isa('Core::Common::Errors::Domain') eq 1, 'Wrong password');
+$maybe_true = $user->value->validate_password('1234567');
 
+ok($maybe_true->is_left() eq 1, 'Wrong password');
 
-ok($user->update({'name' => 'Some'}) eq 1, 'Update name');
+$maybe_true = $user->value->update({'name' => 'Some'});
 
-ok($user->update({'last_name' => 'Some'}) eq 1, 'Update last name');
+ok($maybe_true->is_right() eq 1, 'Update name');
 
-ok($user->update({'email' => 'name@gmail.com'}) eq 1, 'Update last email');
+$maybe_true = $user->value->update({'last_name' => 'Some'});
 
-ok($user->update({'password' => 'qwe-rty!12$'}) eq 1, 'Update last password');
+ok($maybe_true->is_right() eq 1, 'Update last name');
 
-ok($user->update({'phone' => '+79683456782'}) eq 1, 'Update last phone');
+$maybe_true = $user->value->update({'email' => 'name@gmail.com'});
+
+ok($maybe_true->is_right() eq 1, 'Update last email');
+
+$maybe_true = $user->value->update({'password' => 'qwe-rty!12$'});
+
+ok($maybe_true->is_right() eq 1, 'Update last password');
+
+$maybe_true = $user->value->update({'phone' => '+79683456782'});
+
+ok($maybe_true->is_right() eq 1, 'Update phone');
 
 1;

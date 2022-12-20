@@ -1,40 +1,11 @@
 package Core::ConfirmationCode::Entity;
 
 use Moo;
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
+use Crypt::Random qw( makerandom_itv );
+use Data::Monad::Either;
 use Core::Common::Errors::Domain;
-use Core::ConfirmationCode::ValueObjects::Code;
 use Core::Common::ValueObjects::Email;
-
-sub factory {
-  my ( $self, $args ) = @_;
-
-  unless ($args) {
-    return Core::Common::Errors::Domain->new({'message' => 'Invalid argument'});
-  }
-
-  unless (reftype($args) eq "HASH") {
-    return Core::Common::Errors::Domain->new({'message' => 'Invalid argument'});
-  }
-
-  my $maybe_email = Core::Common::ValueObjects::Email->factory($args->{email});
-
-  if ($maybe_email->isa('Core::Common::Errors::Domain')) {
-    return $maybe_email;
-  }
-
-  return Core::ConfirmationCode::Entity->new({
-    'email' => $maybe_email,
-    'code' => Core::ConfirmationCode::ValueObjects::Code->factory(),
-    'created' => time() + 900
-  });
-}
-
-sub validate_code {
-  my ( $self, $args ) = @_;
-
-  return $self->code->validate($args);
-}
 
 has email => (
   is => 'ro'
@@ -47,5 +18,89 @@ has code => (
 has created => (
   is => 'ro'
 );
+
+has confirmed => (
+  is => 'ro'
+);
+
+my $validate_code = sub {
+  my ( $self, $arg ) = @_;
+
+  unless ($arg) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Wrong confirmation code'})
+    );
+  }
+
+  if ($self->code !=  $arg) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Wrong confirmation code'})
+    );
+  }
+
+  return right(1);
+};
+
+my $validate_lifetime = sub {
+  my $self = shift;
+
+  if (time() >= $self->created) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Invalid code expiration time'})
+    );
+  }
+
+  return right(1);
+};
+
+sub factory {
+  my ( $self, $email ) = @_;
+
+  unless (blessed $email) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Invalid argument'})
+    );
+  }
+
+  unless ($email->isa('Core::Common::ValueObjects::Email')) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Invalid argument'})
+    );
+  }
+
+  return right(Core::ConfirmationCode::Entity->new({
+    'email' => $email,
+    'code' => makerandom_itv(Size => 10, Strength => 1, Uniform => 1, Lower => 1000, Upper => 9999),
+    'created' => time() + 900,
+    'confirmed' => 0
+  }));
+}
+
+sub check_lifetime {
+  my ( $self, $args ) = @_;
+
+  my $maybe_true = $validate_lifetime->($self);
+  if ($maybe_true->is_right()) {
+    return left(Core::Common::Errors::Domain->new({'message' => 'You already have a confirmation code'}));
+  }
+
+  return right(1);
+}
+
+sub confirm {
+  my ( $self, $args ) = @_;
+
+  my $maybe_true = $validate_lifetime->($self);
+  if ($maybe_true->is_left()) {
+    return $maybe_true;
+  }
+
+  $maybe_true = $validate_code->($self, $args);
+  if ($maybe_true->is_left()) {
+    return $maybe_true;
+  }
+
+  return right(1);
+}
 
 1;
