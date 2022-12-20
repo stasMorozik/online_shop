@@ -1,4 +1,4 @@
-package Core::ConfirmationCode::Fake::Creating;
+package Core::ConfirmationCode::Fake::Confirming;
 
 use Moo;
 use Scalar::Util qw(blessed);
@@ -6,7 +6,7 @@ use Data::Monad::Either;
 use Core::Common::Errors::Infrastructure;
 use Core::ConfirmationCode::Entity;
 
-sub create {
+sub confirm {
   my ( $self, $arg ) = @_;
 
   unless (blessed $arg) {

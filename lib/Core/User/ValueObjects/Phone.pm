@@ -26,7 +26,8 @@ sub factory {
 }
 
 has value => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 1;

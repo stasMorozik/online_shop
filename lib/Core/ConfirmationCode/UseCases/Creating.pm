@@ -6,7 +6,6 @@ use Scalar::Util qw(blessed);
 use Core::Common::Errors::Domain;
 use Core::Common::Errors::Infrastructure;
 use Core::ConfirmationCode::Entity;
-use Data::Dump;
 
 has getting_port => (
   is => 'ro',

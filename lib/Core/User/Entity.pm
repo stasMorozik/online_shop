@@ -14,31 +14,38 @@ use Data::Monad::Either;
 use Data::Dump;
 
 has id => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has name => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has last_name => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has email => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has phone => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has password => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has created => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 sub factory {

@@ -8,19 +8,23 @@ use Core::Common::Errors::Domain;
 use Core::Common::ValueObjects::Email;
 
 has email => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has code => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has created => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 has confirmed => (
-  is => 'ro'
+  is => 'ro',
+  required => 1
 );
 
 my $validate_code = sub {

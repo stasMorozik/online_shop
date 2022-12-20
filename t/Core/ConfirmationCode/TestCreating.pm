@@ -74,7 +74,7 @@ try {
 
 my $maybe_true = $use_case->create('name@gmail.com');
 
-ok($maybe_true->is_right() eq 1, 'Created confirmation port');
+ok($maybe_true->is_right() eq 1, 'Created confirmation code');
 
 $maybe_true = $use_case->create('name@gmail.');
 
