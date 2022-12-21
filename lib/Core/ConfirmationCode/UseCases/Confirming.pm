@@ -4,8 +4,6 @@ use Moo;
 use Data::Monad::Either;
 use Scalar::Util qw(blessed reftype);
 use Core::Common::Errors::Domain;
-use Core::Common::Errors::Infrastructure;
-use Core::ConfirmationCode::Entity;
 use Data::Dump;
 
 has getting_port => (
@@ -39,12 +37,6 @@ has confirming_port => (
 sub confirm {
   my ( $self, $args ) = @_;
 
-  unless ($args) {
-    return left(
-      Core::Common::Errors::Domain->new({'message' => 'Invalid arguments'})
-    );
-  }
-
   unless (reftype($args) eq "HASH") {
     return left(
       Core::Common::Errors::Domain->new({'message' => 'Invalid arguments'})
@@ -52,7 +44,6 @@ sub confirm {
   }
 
   my $maybe_email = Core::Common::ValueObjects::Email->factory($args->{email});
-
   if ($maybe_email->is_left()) {
     return $maybe_email;
   }

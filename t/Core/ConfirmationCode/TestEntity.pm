@@ -40,6 +40,10 @@ $maybe_true = $code->value->confirm($code->value->code);
 
 ok($maybe_true->is_right() eq 1, 'Confirm code');
 
+$maybe_true = $code->value->is_confirmed();
+
+ok($maybe_true->is_right() eq 1, 'Confirmed code');
+
 $maybe_true = $code->value->confirm(123);
 
 ok($maybe_true->is_left() eq 1, 'Wrong code');

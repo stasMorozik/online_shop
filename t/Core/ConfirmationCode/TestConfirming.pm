@@ -9,13 +9,14 @@ use Try::Tiny;
 use Test::More;
 use Data::Dump;
 
+require_ok( 'Core::ConfirmationCode::UseCases::Creating' );
 require_ok( 'Core::ConfirmationCode::UseCases::Confirming' );
 require_ok( 'Core::ConfirmationCode::Fake::Getting' );
 require_ok( 'Core::ConfirmationCode::Fake::Creating' );
 require_ok( 'Core::ConfirmationCode::Fake::Notifying' );
 require_ok( 'Core::ConfirmationCode::Fake::Confirming' );
 
-my $codes = {};
+our $codes = {};
 
 my $getting_adapter = Core::ConfirmationCode::Fake::Getting->new({'codes' => $codes});
 my $creating_adapter = Core::ConfirmationCode::Fake::Creating->new({'codes' => $codes});

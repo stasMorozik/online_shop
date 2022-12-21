@@ -57,6 +57,18 @@ my $validate_lifetime = sub {
   return right(1);
 };
 
+sub is_confirmed {
+  my ( $self ) = @_;
+
+  unless ($self->{confirmed}) {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Mail not confirmed'})
+    );
+  }
+
+  return right(1);
+}
+
 sub factory {
   my ( $self, $email ) = @_;
 
@@ -103,6 +115,8 @@ sub confirm {
   if ($maybe_true->is_left()) {
     return $maybe_true;
   }
+
+  $self->{confirmed} = 1;
 
   return right(1);
 }

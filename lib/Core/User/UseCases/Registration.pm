@@ -1,12 +1,13 @@
-package Core::ConfirmationCode::UseCases::Creating;
+package Core::User::UseCases::Registration;
 
 use Moo;
 use Data::Monad::Either;
-use Scalar::Util qw(blessed);
+use Scalar::Util qw(blessed reftype);
 use Core::Common::Errors::Domain;
 use Core::ConfirmationCode::Entity;
+use Core::User::Entity;
 
-has getting_port => (
+has getting_confirmation_code_port => (
   is => 'ro',
   required => 1,
   isa => sub {
@@ -48,39 +49,54 @@ has notifying_port => (
   }
 );
 
-sub create {
-  my ( $self, $arg ) = @_;
+sub registry {
+  my ( $self, $args ) = @_;
 
-  my $maybe_email = Core::Common::ValueObjects::Email->factory($arg);
+  unless (reftype($args) eq "HASH") {
+    return left(
+      Core::Common::Errors::Domain->new({'message' => 'Invalid arguments'})
+    );
+  }
 
+  my $maybe_email = Core::Common::ValueObjects::Email->factory($args->{email});
   if ($maybe_email->is_left()) {
     return $maybe_email;
   }
 
-  my $maybe_code = $self->getting_port->get($maybe_email->value);
-
-  if ($maybe_code->is_right()) {
-    my $maybe_true = $maybe_code->value->check_lifetime();
-
-    if ($maybe_true->is_left()) {
-      return $maybe_true;
-    }
+  my $maybe_code = $self->getting_confirmation_code_port->get($maybe_email->value);
+  if ($maybe_code->is_left()) {
+    return $maybe_code;
   }
 
-  $maybe_code = Core::ConfirmationCode::Entity->factory($maybe_email->value);
-  
-  my $maybe_true = $self->creating_port->create($maybe_code->value);
+  my $maybe_true = $maybe_code->value->is_confirmed();
+  if ($maybe_true->is_left()) {
+    return $maybe_true;
+  }
 
+  my $maybe_user = Core::User::Entity->factory({
+    'name' => $args->{name}, 
+    'last_name' => $args->{last_name}, 
+    'code' => $maybe_code->value, 
+    'password' => $args->{password}, 
+    'phone' => $args->{phone}
+  });
+
+  if ($maybe_user->is_left()) {
+    return $maybe_user;
+  }
+
+  $maybe_true = $self->creating_port->create($maybe_user->value);
   if ($maybe_true->is_left()) {
     return $maybe_true;
   }
 
   $self->notifying_port->notify({
     'email' => $maybe_email->value,
-    'message' => "Your code is $maybe_code->value->{code}"
+    'message' => "Hello $args->{name} $args->{last_name}! Welcome and enjoy your shopping!"
   });
 
   return right(1);
 }
 
 1;
+
