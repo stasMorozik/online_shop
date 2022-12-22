@@ -10,7 +10,8 @@ use Core::ConfirmationCode::TestEntity;
 
 use Core::ConfirmationCode::TestCreating;
 use Core::ConfirmationCode::TestConfirming;
-
 use Core::User::TestRegistration;
+
+use PostgreSQLAdapters::ConfirmationCode::TestCreating;
 
 done_testing(76);
