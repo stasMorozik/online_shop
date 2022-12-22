@@ -1,13 +1,10 @@
 package PostgreSQLAdapters::ConfirmationCode::Creating;
 
 use Moo;
-use Try::Tiny;
-use Data::Dump;
 use Data::Monad::Either;
 use DBD::Pg qw(:pg_types);
 use Scalar::Util qw(blessed);
 use Core::Common::Errors::Infrastructure;
-use Core::ConfirmationCode::Entity;
 
 has dbh => (
   is => 'ro',
