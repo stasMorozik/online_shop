@@ -1,26 +1,27 @@
-package PostgreSQLAdapters::ConfirmationCode::Creating;
+package PostgreSQLAdapters::ConfirmationCode::Confirming;
 
 use Moo;
 use Data::Monad::Either;
 use DBD::Pg qw(:pg_types);
 use Scalar::Util qw(blessed);
 use Core::Common::Errors::Infrastructure;
+use Core::ConfirmationCode::Entity;
 
 has dbh => (
   is => 'ro',
   required => 1,
   isa => sub {
     unless (blessed $_[0]) {
-      die Core::Common::Errors::Infrastructure->new({'message' => 'Invalid creating adapter'});   
+      die Core::Common::Errors::Infrastructure->new({'message' => 'Invalid getting adapter'});
     }
 
     unless ($_[0]->isa('DBI::db')) {
-      die Core::Common::Errors::Infrastructure->new({'message' => 'Invalid creating adapter'});   
+      die Core::Common::Errors::Infrastructure->new({'message' => 'Invalid getting adapter'});
     }
   }
 );
 
-sub create {
+sub confirm {
   my ( $self, $arg ) = @_;
 
   unless (blessed $arg) {
@@ -35,17 +36,11 @@ sub create {
     );
   }
 
-  my $sth_del = $self->dbh->prepare("DELETE FROM codes WHERE email = ?");
-  
-  $sth_del->execute($arg->email->value);
+  my $sth_update = $self->dbh->prepare('UPDATE codes SET confirmed=? WHERE email=?');
 
-  my $sth_insert = $self->dbh->prepare('INSERT INTO codes VALUES (?, ?, ?, ?)');
-
-  $sth_insert->execute(
-    $arg->code,
-    $arg->email->value,
-    $arg->created,
-    $arg->confirmed
+  $sth_update->execute(
+    $arg->confirmed,
+    $arg->email->value
   );
 
   $self->dbh->commit;

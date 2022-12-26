@@ -14,10 +14,8 @@ require_ok( 'PostgreSQLAdapters::ConfirmationCode::Creating' );
 require_ok( 'Core::ConfirmationCode::Entity' );
 require_ok( 'Core::Common::ValueObjects::Email' );
 
-my $dbh = PostgreSQLAdapters::DBFactory->factory();
-
 my $creating_code_adapter = PostgreSQLAdapters::ConfirmationCode::Creating->new({
-  'dbh' => $dbh
+  'dbh' => $PostgreSQLAdapters::DBFactory::dbh
 });
 
 try {
@@ -50,8 +48,6 @@ $maybe_true = $creating_code_adapter->create({});
 
 ok($maybe_true->is_left() eq 1, 'Invalid code');
 
-$dbh->do('DELETE from codes');
-
-$dbh->disconnect;
+$PostgreSQLAdapters::DBFactory::dbh->do('DELETE from codes', {AutoCommit => 1});
 
 1;

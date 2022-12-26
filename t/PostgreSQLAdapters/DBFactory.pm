@@ -9,4 +9,7 @@ sub factory {
   });
 }
 
+
+our $dbh = factory();
+
 1;

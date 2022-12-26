@@ -60,7 +60,7 @@ sub create {
   my $maybe_code = $self->getting_port->get($maybe_email->value);
 
   if ($maybe_code->is_right()) {
-    my $maybe_true = $maybe_code->is_confirmed();
+    my $maybe_true = $maybe_code->value->is_confirmed();
 
     if ($maybe_true->is_left()) {
       $maybe_true = $maybe_code->value->check_lifetime();

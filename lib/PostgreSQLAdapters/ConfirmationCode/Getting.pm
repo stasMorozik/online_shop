@@ -5,7 +5,6 @@ use Data::Monad::Either;
 use DBD::Pg qw(:pg_types);
 use Scalar::Util qw(blessed);
 use Core::Common::Errors::Infrastructure;
-use Core::Common::ValueObjects::Email;
 use Core::ConfirmationCode::Entity;
 
 has dbh => (
@@ -41,23 +40,21 @@ sub get {
 
   $sth->execute($arg->value);
   
-  my ( @row ) = $sth->fetchrow_array();
+  my ( $row ) = $sth->fetchrow_hashref();
 
-  unless (@row) {
+  unless ($row) {
     return left(
       Core::Common::Errors::Infrastructure->new({'message' => 'Code not found'})
     );
   }
 
-  my $code_entity = Core::ConfirmationCode::Entity->new({
-    'email' => Core::Common::ValueObjects::Email->new({'value' => $row[1] }),
-    'code' => $row[0],
-    'created' => $row[2],
-    'email' => $row[3]
-  });
-
   return right(
-    @row
+    Core::ConfirmationCode::Entity->new({
+      'email' => Core::Common::ValueObjects::Email->new({'value' => $row->{email} }),
+      'code' => $row->{code},
+      'created' => $row->{created},
+      'confirmed' => $row->{confirmed}
+    })
   );
 }
 
